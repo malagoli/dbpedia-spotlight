@@ -20,6 +20,8 @@ package org.dbpedia.spotlight.model
 
 import java.lang.Short
 
+import org.dbpedia.spotlight.log.SpotlightLog
+
 /**
  * Representation of types (DBpedia, Freebase, Schema.org, etc.)
  *
@@ -73,7 +75,15 @@ class DBpediaType(var name : String) extends OntologyType {
     }
 
     override def getFullUri =  if (name.substring(0,4).equalsIgnoreCase("http")) name else DBpediaType.DBPEDIA_ONTOLOGY_PREFIX + name
-    override def typeID = if (name.substring(0,4).equalsIgnoreCase("http")) name else "DBpedia:".concat(name)
+    override def typeID = {
+      try {
+        if (name.length() >= 4 && name.substring(0, 4).equalsIgnoreCase("http")) name else "DBpedia:".concat(name)
+      } catch {
+        case e: Exception =>
+          SpotlightLog.error(this.getClass, "Unable to retrieve name for [%s]", name)
+          "DBpedia:".concat(name)
+      }
+    }
 
 }
 
